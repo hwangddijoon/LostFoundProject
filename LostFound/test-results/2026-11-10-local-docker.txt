@@ -1,0 +1,11 @@
+# 실제 환경 시험: 내 PC (Windows, Docker Desktop), 2026-11-10 08:06 UTC, v2 이미지
+# 상황: v1을 실행했던 DB volume이 남아 있는 상태에서 `docker compose up --build`
+
+Container lostfound-db-1 Healthy
+app-1  | INFO:     Started server process [1]
+app-1  | INFO:     Waiting for application startup.
+app-1  | RuntimeError: DB 구조가 이전 버전입니다 (필요: v2, 현재: v1 이하). 기존 데이터를 지우고 다시 시작하려면 'docker compose down -v' 후 'docker compose up'을 실행하세요.
+app-1  | ERROR:    Application startup failed. Exiting.
+app-1 exited with code 3
+
+# 판정: P4 수정(시작 시 DB 구조 버전 확인)이 실제 Docker 환경에서도 의도대로 동작. 안내대로 down -v 후 다시 실행.

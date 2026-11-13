@@ -1,0 +1,47 @@
+name: lostfound
+services:
+  app:
+    build: .
+    # Docker Hub로 주고받을 때는 .env의 APP_IMAGE=도커허브아이디/lostfound:v6
+    image: ${APP_IMAGE:-lostfound:v6}
+    # EC2(x86)에서 그대로 실행되도록 내 PC에서도 x86용으로 빌드
+    platform: linux/amd64
+    ports:
+      - "${APP_BIND:-127.0.0.1}:8080:8000"
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: lostfound
+      DB_USER: lostfound
+      DB_PASSWORD: classroom-only
+      STAFF_EMAILS: ${STAFF_EMAILS:-}
+      OFFICE_NAME: ${OFFICE_NAME:-학생지원팀}
+      OFFICE_LOCATION: ${OFFICE_LOCATION:-학생회관 302호}
+      ENABLE_AI: ${ENABLE_AI:-0}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.6-flash}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-0}
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:17
+    command: ["postgres", "-p", "5432"]
+    environment:
+      POSTGRES_DB: lostfound
+      POSTGRES_USER: lostfound
+      POSTGRES_PASSWORD: classroom-only
+    volumes:
+      - lostfound-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -p 5432 -U lostfound -d lostfound"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  lostfound-data:

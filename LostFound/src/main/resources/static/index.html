@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>찾아줘 — 가천대학교 캠퍼스 분실물</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- R11 로그인 -->
+<div id="login-view" class="login" hidden>
+  <section class="login-card" aria-labelledby="login-title">
+    <h1 id="login-title">찾아줘</h1>
+    <p class="muted">가천대학교 캠퍼스 분실물 찾기 · 학교 이메일로 로그인하세요</p>
+    <div class="segmented" role="group" aria-label="로그인 방식">
+      <button type="button" id="mode-login" aria-pressed="true">로그인</button>
+      <button type="button" id="mode-signup" aria-pressed="false">회원가입</button>
+    </div>
+
+    <form id="login-form">
+      <label>이메일<input id="login-email" type="email" required autocomplete="username" placeholder="아이디@gachon.ac.kr"></label>
+      <label>비밀번호 (회원가입 때 정한 것)<input id="login-password" type="password" required autocomplete="current-password"></label>
+      <button type="submit" class="primary wide">로그인</button>
+      <p id="login-status" role="status"></p>
+    </form>
+
+    <form id="code-form" hidden>
+      <label>이메일<input id="signup-email" type="email" required autocomplete="username" placeholder="아이디@gachon.ac.kr"></label>
+      <p class="hint">학생은 학교 이메일(@gachon.ac.kr)로 인증합니다. 처음 쓰는 이메일이면 여기서 인증하고 찾아줘 비밀번호를 정하세요. 비밀번호를 잊었을 때도 여기서 다시 인증하면 새로 정할 수 있습니다.</p>
+      <button type="submit" class="primary wide" id="code-button">인증번호 받기</button>
+      <p id="code-status" role="status"></p>
+    </form>
+    <form id="verify-form" hidden>
+      <label>인증번호 6자리<input id="verify-code" inputmode="numeric" pattern="\d{6}" maxlength="6" required autocomplete="one-time-code"></label>
+      <label>비밀번호 (8자 이상)<input id="verify-password" type="password" minlength="8" required autocomplete="new-password"></label>
+      <label>비밀번호 확인<input id="verify-password2" type="password" minlength="8" required autocomplete="new-password"></label>
+      <button type="submit" class="primary wide">인증하고 시작하기</button>
+      <p id="verify-status" role="status"></p>
+    </form>
+  </section>
+</div>
+
+<div id="app-view" class="layout" hidden>
+  <aside class="side">
+    <div class="brand"><strong>찾아줘</strong><span>캠퍼스 분실물 찾기</span></div>
+    <nav aria-label="주 메뉴" class="menu">
+      <span class="menu-group">이용자</span>
+      <button type="button" data-page="list" aria-current="page">보관 중인 물건</button>
+      <button type="button" data-page="found">주운 물건 맡기기</button>
+      <button type="button" data-page="lost">분실 신고</button>
+      <button type="button" data-page="mine">내 신고</button>
+      <span class="menu-group" data-staff hidden>담당자</span>
+      <button type="button" data-page="office" data-staff hidden>보관소 관리</button>
+    </nav>
+    <div class="account"><span id="me-email"></span><button type="button" id="logout" class="link">로그아웃</button></div>
+  </aside>
+
+  <main class="content">
+    <!-- R3 공개 목록 -->
+    <section id="page-list" class="page">
+      <header class="page-head"><h1>보관 중인 물건</h1><p class="muted" id="office-line"></p></header>
+      <form class="filters" id="list-filters">
+        <label>종류<select id="list-category"><option value="">전체</option></select></label>
+        <label>건물<select id="list-building"><option value="">전체</option></select></label>
+        <label>정렬<select id="list-sort">
+          <option value="date-desc">습득일 최신순</option>
+          <option value="date-asc">습득일 오래된순</option>
+          <option value="stage-asc">공개 단계 낮은순</option>
+          <option value="stage-desc">공개 단계 높은순</option>
+        </select></label>
+        <span id="list-count" class="muted"></span>
+      </form>
+      <details class="guide">
+        <summary>공개 단계란?</summary>
+        <div class="guide-grid">
+          <div>
+            <p><span class="stage s1">1단계 · 기본</span></p>
+            <p>물건이 들어온 직후부터 공개되는 정보예요. <strong>종류, 주운 건물, 습득일</strong>만 보여요.</p>
+            <p class="small muted">색상이나 생김새까지 바로 공개하면, 주인이 아닌 사람이 그 설명을 보고 자기 물건이라고 말할 수 있어서 처음에는 최소한만 공개해요.</p>
+          </div>
+          <div>
+            <p><span class="stage s2">2단계 · 보완</span></p>
+            <p>보관 <strong>7일</strong>이 지나도 주인이 찾아가지 않으면, 담당자가 물건을 다시 보고 특징을 보완해요. 그때부터 <strong>색상, 상세 장소, 특징 네 칸</strong>(브랜드·모델, 부착물·장식, 손상·흠집, 내용물·기타)이 보여요.</p>
+            <p class="small muted">설명을 더 보여 줘서, 신고하지 않은 주인도 목록을 보고 알아볼 수 있게 해요.</p>
+          </div>
+        </div>
+        <p class="small muted">어느 단계에서도 주인만 아는 <strong>확인용 특징</strong>은 공개하지 않아요. 물건을 받을 때 그 특징을 물어 본인인지 확인해요. 보관 한 달(30일)이 지나면 복정파출소로 인계돼요.</p>
+      </details>
+      <p id="list-status" role="status"></p>
+      <div class="table-box">
+        <table>
+          <thead><tr><th scope="col">접수번호</th><th scope="col">종류</th><th scope="col">습득 장소</th><th scope="col">습득일</th><th scope="col">공개 단계</th><th scope="col">공개 정보</th></tr></thead>
+          <tbody id="item-rows"></tbody>
+        </table>
+      </div>
+      <p class="hint">보관 한 달(30일)이 지난 물건은 복정파출소로 인계됩니다. 분실 신고를 하면 인계 여부도 알려드립니다.</p>
+    </section>
+
+    <!-- R1 습득자 등록 -->
+    <section id="page-found" class="page" hidden>
+      <header class="page-head"><h1>주운 물건 맡기기</h1><p class="muted">주운 장소와 시간만 입력하고 보관소에 맡겨 주세요. 물건의 특징은 담당자가 실물을 보고 입력합니다.</p></header>
+      <form id="found-form" class="panel">
+        <div class="form-row"><label>주운 건물<select id="found-building" required></select></label><label>상세 장소<input id="found-place" maxlength="100" placeholder="예: 2층 노트북 열람실"></label></div>
+        <div class="form-row"><label>주운 시각<input id="found-at" type="datetime-local" required></label><span></span></div>
+        <p class="hint" id="office-hint"></p>
+        <button type="submit" class="primary">등록하고 접수번호 받기</button>
+        <p id="found-status" role="status"></p>
+      </form>
+    </section>
+
+    <!-- R4, R5 분실 신고 -->
+    <section id="page-lost" class="page" hidden>
+      <header class="page-head"><h1>분실 신고</h1><p class="muted">기억나는 만큼만 적어도 됩니다. 장소를 모르면 고르지 않고, 시간은 마지막으로 본 때부터 없어진 걸 안 때까지로 적어 주세요.</p></header>
+      <form id="lost-form" class="panel">
+        <div class="form-row"><label>종류<select id="lost-category" required></select></label><label>색상<select id="lost-color"></select></label></div>
+        <fieldset><legend>특징 (아는 칸만)</legend>
+          <div class="form-row"><label>브랜드·모델<input id="lost-brand" maxlength="100" placeholder="예: 에어팟 프로2"></label><label>부착물·장식<input id="lost-attached" maxlength="100" placeholder="예: 케이스에 고양이 스티커"></label></div>
+          <div class="form-row"><label>손상·흠집<input id="lost-damage" maxlength="100" placeholder="예: 모서리 긁힘"></label><label>내용물·기타<input id="lost-contents" maxlength="100" placeholder="예: 학생증, 카드 2장"></label></div>
+        </fieldset>
+        <fieldset><legend>잃어버렸을 수 있는 장소 (모르면 비워 두기)</legend><div id="lost-buildings" class="checks"></div></fieldset>
+        <div class="form-row"><label>마지막으로 본 때<input id="lost-from" type="datetime-local" required></label><label>없어진 걸 안 때<input id="lost-to" type="datetime-local" required></label></div>
+        <button type="submit" class="primary" id="lost-submit">신고하고 찾아보기</button>
+        <p id="lost-status" role="status"></p>
+      </form>
+      <div id="lost-result"></div>
+    </section>
+
+    <!-- R8 내 신고 -->
+    <section id="page-mine" class="page" hidden>
+      <header class="page-head"><h1>내 신고</h1><p class="muted">진행 중인 신고는 3건까지입니다. 새 물건이 들어왔을 수 있으니 가끔 다시 찾아보세요.</p></header>
+      <p id="mine-status" role="status"></p>
+      <div class="table-box">
+        <table>
+          <thead><tr><th scope="col">신고번호</th><th scope="col">종류</th><th scope="col">특징</th><th scope="col">신고일</th><th scope="col">상태</th><th scope="col">동작</th></tr></thead>
+          <tbody id="mine-rows"></tbody>
+        </table>
+      </div>
+      <div id="mine-result"></div>
+    </section>
+
+    <!-- R2, R6, R9, R10 보관소 -->
+    <section id="page-office" class="page" hidden>
+      <header class="page-head"><h1>보관소 관리</h1><p class="muted" id="office-line2"></p></header>
+      <div class="filters">
+        <label>상태<select id="office-status"><option value="waiting">입고 대기</option><option value="review">보완 필요 (7일 이상)</option><option value="stored">보관 중</option><option value="transfer">인계 대상 (30일 이상)</option><option value="returned">수령 완료</option><option value="transferred">경찰 인계</option></select></label>
+        <button type="button" id="direct-register" class="secondary">직접 등록</button>
+        <button type="button" id="transfer-all" class="primary" hidden>인계 대상 모두 인계</button>
+      </div>
+      <p id="office-status-text" role="status"></p>
+      <div class="table-box">
+        <table>
+          <thead><tr><th scope="col">접수번호</th><th scope="col">물건</th><th scope="col">습득</th><th scope="col">보관</th><th scope="col">동작</th></tr></thead>
+          <tbody id="office-rows"></tbody>
+        </table>
+      </div>
+      <h2>신고 조회와 수령 처리</h2>
+      <form id="report-lookup" class="filters"><label>신고번호<input id="lookup-no" placeholder="예: L0001" required></label><button type="submit" class="primary">조회</button></form>
+      <p id="lookup-status" role="status"></p>
+      <div id="report-view"></div>
+    </section>
+    <footer class="muted" id="runtime"></footer>
+  </main>
+</div>
+
+<!-- R2 세부 사항 입력 / 직접 등록 -->
+<dialog id="detail-dialog" aria-labelledby="detail-title">
+  <div class="dialog-heading"><h2 id="detail-title">세부 사항 입력</h2><button type="button" id="close-detail" aria-label="닫기">×</button></div>
+  <form id="detail-form">
+    <div id="direct-fields" hidden>
+      <div class="form-row"><label>주운 건물<select id="d-building"><option value="">모름</option></select></label><label>상세 장소<input id="d-place" maxlength="100"></label></div>
+      <div class="form-row"><label>주운 시각 (모르면 비움)<input id="d-found-at" type="datetime-local"></label><span></span></div>
+    </div>
+    <div class="form-row"><label>종류<select id="d-category" required></select></label><label>색상(문양)<select id="d-color" required></select></label></div>
+    <p class="hint">보이는 그대로 적어 주세요. 확실하지 않은 품종·모델명은 추측하지 않습니다. 해당 없는 칸은 비워 둡니다.</p>
+    <div class="form-row"><label>브랜드·모델<input id="d-brand" maxlength="100"></label><label>부착물·장식<input id="d-attached" maxlength="100"></label></div>
+    <div class="form-row"><label>손상·흠집<input id="d-damage" maxlength="100"></label><label>내용물·기타<input id="d-contents" maxlength="100"></label></div>
+    <label>확인용 특징 (비공개)<input id="d-secret" required maxlength="100" placeholder="주인만 알 만한 것"></label>
+    <p class="hint">저장한 뒤 물건에 접수번호를 붙여 보관합니다.</p>
+    <button type="submit" class="primary">저장하고 보관 중으로</button>
+    <p id="detail-status" role="status"></p>
+  </form>
+</dialog>
+
+<!-- R9 공개 정보 보완 -->
+<dialog id="review-dialog" aria-labelledby="review-title">
+  <div class="dialog-heading"><h2 id="review-title">특징 보완</h2><button type="button" id="close-review" aria-label="닫기">×</button></div>
+  <form id="review-form">
+    <p class="hint">보관 7일이 지난 물건입니다. 물건을 다시 보고 특징을 고치거나 채워 주세요. 저장하면 공개 2단계가 되어 <strong>색상, 상세 장소, 아래 네 칸</strong>이 공개 목록에 보입니다. 비운 칸은 공개되지 않아요.</p>
+    <p id="review-secret" class="secret"></p>
+    <div class="form-row"><label>브랜드·모델<input id="v-brand" maxlength="100"></label><label>부착물·장식<input id="v-attached" maxlength="100"></label></div>
+    <div class="form-row"><label>손상·흠집<input id="v-damage" maxlength="100"></label><label>내용물·기타<input id="v-contents" maxlength="100"></label></div>
+    <button type="submit" class="primary">보완하고 공개</button>
+    <p id="review-status" role="status"></p>
+  </form>
+</dialog>
+
+<!-- R10 경찰 인계 -->
+<dialog id="transfer-dialog" aria-labelledby="transfer-title">
+  <div class="dialog-heading"><h2 id="transfer-title">경찰 인계</h2><button type="button" id="close-transfer" aria-label="닫기">×</button></div>
+  <form id="transfer-form">
+    <p class="hint" id="transfer-hint">보관 한 달(30일)이 지난 물건을 관할 파출소에 인계합니다. 인계 후에는 공개 목록에서 빠지고, 분실 신고와 일치하면 파출소를 안내합니다.</p>
+    <div class="form-row"><label>받은 경찰관 이름<input id="t-officer" required maxlength="30"></label><label>메모 (선택)<input id="t-note" maxlength="200" placeholder="예: 인계증 번호"></label></div>
+    <button type="submit" class="primary">인계 완료</button>
+    <p id="transfer-status" role="status"></p>
+  </form>
+</dialog>
+
+<!-- R6 수령 처리 -->
+<dialog id="return-dialog" aria-labelledby="return-title">
+  <div class="dialog-heading"><h2 id="return-title">수령 처리</h2><button type="button" id="close-return" aria-label="닫기">×</button></div>
+  <form id="return-form">
+    <p class="hint">확인용 특징을 답을 유도하지 않는 질문으로 물어보고, 신분증을 확인한 뒤 처리하세요.</p>
+    <p id="return-secret" class="secret"></p>
+    <div class="form-row"><label>이름<input id="r-name" required maxlength="30"></label><label>학번·교직원번호<input id="r-no" required minlength="4" maxlength="20"></label></div>
+    <div class="form-row"><label>연락처<input id="r-phone" required pattern="[0-9\-]{9,15}" placeholder="010-0000-0000"></label><label>확인한 신분증<select id="r-id-type"><option>학생증</option><option>주민등록증</option><option>운전면허증</option><option>교직원증</option><option>기타</option></select></label></div>
+    <button type="submit" class="primary">수령 완료</button>
+    <p id="return-status" role="status"></p>
+  </form>
+</dialog>
+<script src="/app.js"></script>
+</body>
+</html>

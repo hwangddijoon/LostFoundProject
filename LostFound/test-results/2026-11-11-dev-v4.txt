@@ -1,0 +1,77 @@
+# 개발 환경 시험 결과 (2026-11-11, v4: 시드 50건, P7 수정)
+
+## 1. 단위 테스트
+tests/test_logic.py::test_needs_review_after_7_days[1-False] PASSED      [  3%]
+tests/test_logic.py::test_needs_review_after_7_days[167-False] PASSED    [  6%]
+tests/test_logic.py::test_needs_review_after_7_days[168-True] PASSED     [ 10%]
+tests/test_logic.py::test_needs_review_after_7_days[960-True] PASSED     [ 13%]
+tests/test_logic.py::test_reviewed_or_not_stored_items_do_not_need_review PASSED [ 17%]
+tests/test_logic.py::test_public_view_before_and_after_review PASSED     [ 20%]
+tests/test_logic.py::test_unknown_found_time_uses_created_at PASSED      [ 24%]
+tests/test_logic.py::test_needs_transfer_after_28_days[27-False] PASSED  [ 27%]
+tests/test_logic.py::test_needs_transfer_after_28_days[28-True] PASSED   [ 31%]
+tests/test_logic.py::test_needs_transfer_after_28_days[60-True] PASSED   [ 34%]
+tests/test_logic.py::test_transferred_item_points_to_police PASSED       [ 37%]
+tests/test_logic.py::test_note_reveals_secret PASSED                     [ 41%]
+tests/test_logic.py::test_vague_report_rejected PASSED                   [ 44%]
+tests/test_logic.py::test_specific_report_passes PASSED                  [ 48%]
+tests/test_logic.py::test_grade_and_shown_matches PASSED                 [ 51%]
+tests/test_logic.py::test_owner_view_hides_details PASSED                [ 55%]
+tests/test_logic.py::test_number_parsing PASSED                          [ 58%]
+tests/test_logic.py::test_future_found_time_rejected PASSED              [ 62%]
+tests/test_logic.py::test_lost_range_checked PASSED                      [ 65%]
+tests/test_logic.py::test_review_requires_note PASSED                    [ 68%]
+tests/test_logic.py::test_handover_requires_personal_info PASSED         [ 72%]
+tests/test_logic.py::test_validate_match_rejects_unknown_or_duplicate_ids PASSED [ 75%]
+tests/test_logic.py::test_prompt_treats_input_as_data PASSED             [ 79%]
+tests/test_logic.py::test_score_candidates_through_http PASSED           [ 82%]
+tests/test_logic.py::test_http_error_and_bad_json_become_unavailable PASSED [ 86%]
+tests/test_logic.py::test_placeholder_key_becomes_unavailable_not_crash PASSED [ 89%]
+tests/test_logic.py::test_unexpected_error_becomes_unavailable PASSED    [ 93%]
+tests/test_logic.py::test_ai_disabled_and_missing_key PASSED             [ 96%]
+tests/test_logic.py::test_schema_sent_to_gemini_has_no_refs PASSED       [100%]
+============================== 29 passed in 1.12s ==============================
+
+## 2. DB 시나리오
+PASS seed: 49 stored + 1 waiting
+PASS AC1 finder register -> F0051 waiting, list unchanged
+PASS R1 unknown building rejected
+PASS AC13 admin password
+PASS AC13 Korean password -> 401, not server error
+PASS AC3 details entered -> stored, list +1
+PASS R2 store twice rejected
+PASS R2 unknown category rejected
+PASS AC4 stage 1/2 by review, '보완 필요' 9건 (F0006·F0004 포함, 보완한 F0005 제외, 오래된 순)
+PASS AC17 review F0004 -> public stage 2, off review list
+PASS R9 re-review overwrites note, fills only given feature
+PASS AC18 review before 7 days rejected
+PASS AC19 note containing secret rejected, nothing saved
+PASS R9 waiting item rejected
+PASS R10 transfer list 4건, all >= 28 days, includes F0011
+PASS AC21 transfer before 28 days rejected
+PASS AC20 transferred: off public list, recorded
+PASS R10 second transfer rejected
+PASS R10 transferred item cannot be reviewed
+PASS AC22 lost report finds transferred item -> points to 복정파출소
+PASS AC7 vague report rejected with questions: 브랜드나 모델, 형태를 아시나요? (예: 에어팟 프로, 반지갑)
+PASS AC5 L0002 -> F0001 높음, owner view has no reason/secret
+PASS R6 office report shows score, verdicts, secret
+PASS AC6 place unknown still matches F0001
+PASS AC8 no candidate -> message, report kept
+PASS AC9 AI unavailable -> fallback F0001,F0002 public info only
+PASS R5-2 office sees candidates when AI failed
+PASS P7 placeholder key -> 201 + fallback, not 500
+PASS AC12 4th active report rejected
+PASS rematch requires matching student id
+PASS rematch works
+PASS cancel once
+PASS AC10 returned: off list, handover saved, report resolved, not re-matched
+PASS AC11 second return rejected
+PASS R6 resolved report cannot be reused
+PASS R6 waiting item cannot be returned
+PASS bad receipt numbers
+PASS R9 returned item rejected
+PASS R6 transferred item cannot be returned at office
+PASS AC14 initialize again keeps data, no reseed
+PASS R2 direct register with unknown place/time
+ALL SCENARIOS PASSED

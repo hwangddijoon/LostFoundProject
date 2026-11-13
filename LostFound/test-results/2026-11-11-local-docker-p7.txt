@@ -1,0 +1,14 @@
+# 실제 환경 시험: 내 PC (Windows, Docker Desktop), 2026-11-11, v3 이미지
+# 상황: .env 의 GEMINI_API_KEY 에 예시 문구 "본인의-key" 가 남은 채 ENABLE_AI=1 로 실행, 분실 신고 제출
+
+app-1  |   File "/app/app/ai_client.py", line 132, in _request_raw
+app-1  |     with urlopen(request, timeout=timeout) as response:
+app-1  |   File "/usr/local/lib/python3.13/http/client.py", line 1359, in putheader
+app-1  |     values[i] = one_value.encode('latin-1')
+app-1  | UnicodeEncodeError: 'latin-1' codec can't encode characters in position 0-2: ordinal not in range(256)
+app-1  | INFO:     172.19.0.1:36508 - "POST /api/reports HTTP/1.1" 500 Internal Server Error
+
+# 판정: 실패. R5-2(Gemini 실패 시 대체 목록)가 동작해야 하는데 서버 오류(500)가 남.
+# 원인: API 키를 HTTP 헤더에 넣을 때 한글을 쓸 수 없어 예외 발생, call_gemini 가 이 예외를 잡지 않음.
+# 수정(v4): 키 형식 검사(호출 전), 예상 못 한 예외도 AIUnavailable 로 처리, 시작 로그 경고, .env.example 키 칸을 빈칸으로.
+# 재시험(개발 환경): 단위 테스트 2건, DB 시나리오 "P7 placeholder key -> 201 + fallback" 통과. 실제 Docker 재시험은 7.3.4에 기록.

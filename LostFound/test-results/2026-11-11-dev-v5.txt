@@ -1,0 +1,38 @@
+# 2026-11-11 개발 환경 시험 (v5: Java·Spring Boot, 로그인 추가)
+# 환경: OpenJDK 21, Jackson 2.16, PostgreSQL 16(로컬).
+# 인터넷 차단으로 Spring·JUnit·PostgreSQL JDBC 드라이버를 내려받을 수 없어,
+# Spring·JUnit의 빈 껍데기(stub)로 컴파일하고 단위 테스트만 실행함.
+# 추가 확인: Db.java의 테이블 생성 SQL과 주요 조회·저장 SQL을 psql로 직접 실행해 문법·제약 조건 확인 (통과).
+# 실행하지 못한 것: Spring 서버 기동, JDBC 연결, HTTP 요청, 메일 발송 → docker compose up --build 와 tools/CheckAc.java 로 확인 필요
+
+PASS PolicyTest.noteRevealsSecret
+PASS PolicyTest.needsReviewAfter7Days
+PASS PolicyTest.reviewedOrNotStoredItemsDoNotNeedReview
+PASS PolicyTest.publicViewBeforeAndAfterReview
+PASS PolicyTest.unknownFoundTimeUsesCreatedAt
+PASS PolicyTest.needsTransferAfter28Days
+PASS PolicyTest.transferredItemPointsToPolice
+PASS PolicyTest.vagueReportRejected
+PASS PolicyTest.specificReportPasses
+PASS PolicyTest.gradeAndShownMatches
+PASS PolicyTest.ownerViewHidesDetails
+PASS PolicyTest.numberParsing
+PASS PolicyTest.onlyGachonEmail
+PASS RequestsTest.browserTimeWithoutZoneIsKst
+PASS RequestsTest.handoverRequiresPersonalInfo
+PASS RequestsTest.authRequestsCheckSchoolEmail
+PASS RequestsTest.futureFoundTimeRejected
+PASS RequestsTest.lostRangeChecked
+PASS RequestsTest.reviewRequiresNote
+PASS GeminiClientTest.validateMatchRejectsUnknownOrDuplicateIds
+PASS GeminiClientTest.promptTreatsInputAsData
+PASS GeminiClientTest.scoreCandidatesThroughHttp
+PASS GeminiClientTest.httpErrorAndBadJsonBecomeUnavailable
+PASS GeminiClientTest.retriesOnceOn503
+PASS GeminiClientTest.placeholderKeyBecomesUnavailableNotCrash
+PASS GeminiClientTest.aiDisabled
+PASS AuthTest.codeIsSixDigits
+PASS AuthTest.codeHashDependsOnEmail
+PASS AuthTest.staffListKeepsOnlySchoolEmails
+PASS AuthTest.passwordHashRoundTrip
+30 passed, 0 failed

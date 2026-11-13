@@ -1,0 +1,120 @@
+# 개발 환경 시험 결과 (2026-11-10, v3: R10 경찰 인계 추가)
+# 환경: Python 3, PostgreSQL 16 (로컬), FastAPI·psycopg 대역, 가짜 Gemini
+
+## 1. 단위 테스트
+tests/test_logic.py::test_needs_review_after_7_days[1-False] PASSED      [  3%]
+tests/test_logic.py::test_needs_review_after_7_days[167-False] PASSED    [  7%]
+tests/test_logic.py::test_needs_review_after_7_days[168-True] PASSED     [ 11%]
+tests/test_logic.py::test_needs_review_after_7_days[960-True] PASSED     [ 14%]
+tests/test_logic.py::test_reviewed_or_not_stored_items_do_not_need_review PASSED [ 18%]
+tests/test_logic.py::test_public_view_before_and_after_review PASSED     [ 22%]
+tests/test_logic.py::test_unknown_found_time_uses_created_at PASSED      [ 25%]
+tests/test_logic.py::test_needs_transfer_after_28_days[27-False] PASSED  [ 29%]
+tests/test_logic.py::test_needs_transfer_after_28_days[28-True] PASSED   [ 33%]
+tests/test_logic.py::test_needs_transfer_after_28_days[60-True] PASSED   [ 37%]
+tests/test_logic.py::test_transferred_item_points_to_police PASSED       [ 40%]
+tests/test_logic.py::test_note_reveals_secret PASSED                     [ 44%]
+tests/test_logic.py::test_vague_report_rejected PASSED                   [ 48%]
+tests/test_logic.py::test_specific_report_passes PASSED                  [ 51%]
+tests/test_logic.py::test_grade_and_shown_matches PASSED                 [ 55%]
+tests/test_logic.py::test_owner_view_hides_details PASSED                [ 59%]
+tests/test_logic.py::test_number_parsing PASSED                          [ 62%]
+tests/test_logic.py::test_future_found_time_rejected PASSED              [ 66%]
+tests/test_logic.py::test_lost_range_checked PASSED                      [ 70%]
+tests/test_logic.py::test_review_requires_note PASSED                    [ 74%]
+tests/test_logic.py::test_handover_requires_personal_info PASSED         [ 77%]
+tests/test_logic.py::test_validate_match_rejects_unknown_or_duplicate_ids PASSED [ 81%]
+tests/test_logic.py::test_prompt_treats_input_as_data PASSED             [ 85%]
+tests/test_logic.py::test_score_candidates_through_http PASSED           [ 88%]
+tests/test_logic.py::test_http_error_and_bad_json_become_unavailable PASSED [ 92%]
+tests/test_logic.py::test_ai_disabled_and_missing_key PASSED             [ 96%]
+tests/test_logic.py::test_schema_sent_to_gemini_has_no_refs PASSED       [100%]
+============================== 27 passed in 1.11s ==============================
+
+## 2. DB 시나리오
+PASS seed: 10 stored + 1 waiting
+PASS AC1 finder register -> F0012 waiting, list unchanged
+PASS R1 unknown building rejected
+PASS AC13 admin password
+PASS AC13 Korean password -> 401, not server error
+PASS AC3 details entered -> stored, list +1
+PASS R2 store twice rejected
+PASS R2 unknown category rejected
+PASS AC4 stage 1/2 by review, '보완 필요' = F0006(20d), F0004(10d) oldest first
+PASS AC17 review F0004 -> public stage 2, off review list
+PASS R9 re-review overwrites note, fills only given feature
+PASS AC18 review before 7 days rejected
+PASS AC19 note containing secret rejected, nothing saved
+PASS R9 waiting item rejected
+PASS R10 transfer list = F0011 (30 days)
+PASS AC21 transfer before 28 days rejected
+PASS AC20 transferred: off public list, recorded
+PASS R10 second transfer rejected
+PASS R10 transferred item cannot be reviewed
+PASS AC22 lost report finds transferred item -> points to 복정파출소
+PASS AC7 vague report rejected with questions: 브랜드나 모델, 형태를 아시나요? (예: 에어팟 프로, 반지갑)
+PASS AC5 L0002 -> F0001 높음, owner view has no reason/secret
+PASS R6 office report shows score, verdicts, secret
+PASS AC6 place unknown still matches F0001
+PASS AC8 no candidate -> message, report kept
+PASS AC9 AI unavailable -> fallback F0001,F0002 public info only
+PASS R5-2 office sees candidates when AI failed
+PASS AC12 4th active report rejected
+PASS rematch requires matching student id
+PASS rematch works
+PASS cancel once
+PASS AC10 returned: off list, handover saved, report resolved, not re-matched
+PASS AC11 second return rejected
+PASS R6 resolved report cannot be reused
+PASS R6 waiting item cannot be returned
+PASS bad receipt numbers
+PASS R9 returned item rejected
+PASS R6 transferred item cannot be returned at office
+PASS AC14 initialize again keeps data, no reseed
+PASS R2 direct register with unknown place/time
+ALL SCENARIOS PASSED
+
+## 3. HTTP 점검, AI 꺼짐
+PASS 서비스 응답
+AI 사용: False
+PASS AC13 틀린 비밀번호 거절
+PASS AC1 습득자 등록
+PASS AC2 미래 습득 시각 거절
+PASS AC3 세부 사항 입력 후 보관 중
+PASS AC4 공개 단계와 비공개 특징
+PASS AC19 확인용 특징이 든 공개 설명 거절
+PASS AC17 보완 후 공개 목록 2단계와 공개 설명
+PASS AC18 보관 7일 전 보완 거절
+PASS AC21 보관 28일 전 인계 거절
+PASS AC20 인계 후 공개 목록에서 빠짐
+PASS AC7 추상적 신고 거절과 보완 질문
+PASS AC9 AI 꺼짐 → 조건 목록 대체
+PASS AC12 네 번째 신고 거절
+PASS AC16 연락처 빈칸 거절
+PASS AC10 수령 완료와 인적사항 기록
+PASS AC11 재수령 거절
+
+17/17 통과. AC14(재실행 후 유지)는 docker compose down → up 후 목록을 다시 확인하세요.
+
+## 4. HTTP 점검, 가짜 Gemini 켬 (같은 DB에서 이어서 = 재실행)
+PASS 서비스 응답
+AI 사용: True
+PASS AC13 틀린 비밀번호 거절
+PASS AC1 습득자 등록
+PASS AC2 미래 습득 시각 거절
+PASS AC3 세부 사항 입력 후 보관 중
+PASS AC4 공개 단계와 비공개 특징
+PASS AC19 확인용 특징이 든 공개 설명 거절
+PASS AC17 보완 후 공개 목록 2단계와 공개 설명
+PASS AC18 보관 7일 전 보완 거절
+PASS AC21 보관 28일 전 인계 거절
+PASS AC20 인계 기록 있음 (이전 실행에서 인계)
+PASS AC7 추상적 신고 거절과 보완 질문
+PASS AC5 고양이 스티커 이어폰이 1순위
+PASS AC5 분실자 화면에 근거·확인용 특징 없음
+PASS AC12 네 번째 신고 거절
+PASS AC16 연락처 빈칸 거절
+PASS AC10 수령 완료와 인적사항 기록
+PASS AC11 재수령 거절
+
+18/18 통과. AC14(재실행 후 유지)는 docker compose down → up 후 목록을 다시 확인하세요.

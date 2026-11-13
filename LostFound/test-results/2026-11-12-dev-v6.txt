@@ -1,0 +1,38 @@
+# 2026-11-12 개발 환경 시험 (v6: 2단계 공개를 특징 네 칸으로, 인계 기준 30일, 일괄 인계)
+# 단위 테스트는 Spring·JUnit 빈 껍데기로 실행. v5→v6 DB 변경 SQL과 보완·인계 SQL은 PostgreSQL 16에서 직접 실행해 확인.
+# 시드에서 보완 완료(2단계)로 들어가는 13건의 특징 칸이 확인용 특징을 드러내지 않는지 Policy.revealingFeatures로 확인: 없음
+
+PASS PolicyTest.noteRevealsSecret
+PASS PolicyTest.needsReviewAfter7Days
+PASS PolicyTest.reviewedOrNotStoredItemsDoNotNeedReview
+PASS PolicyTest.publicViewBeforeAndAfterReview
+PASS PolicyTest.unknownFoundTimeUsesCreatedAt
+PASS PolicyTest.needsTransferAfter30Days
+PASS PolicyTest.transferredItemPointsToPolice
+PASS PolicyTest.vagueReportRejected
+PASS PolicyTest.specificReportPasses
+PASS PolicyTest.gradeAndShownMatches
+PASS PolicyTest.ownerViewHidesDetails
+PASS PolicyTest.numberParsing
+PASS PolicyTest.onlyGachonEmail
+PASS PolicyTest.staffEmailMayUseOtherDomain
+PASS PolicyTest.revealingFeaturesNamesTheField
+PASS RequestsTest.reviewNeedsAtLeastOneFeature
+PASS RequestsTest.handoverRequiresPersonalInfo
+PASS RequestsTest.browserTimeWithoutZoneIsKst
+PASS RequestsTest.futureFoundTimeRejected
+PASS RequestsTest.lostRangeChecked
+PASS RequestsTest.authRequestsCheckSchoolEmail
+PASS GeminiClientTest.validateMatchRejectsUnknownOrDuplicateIds
+PASS GeminiClientTest.promptTreatsInputAsData
+PASS GeminiClientTest.scoreCandidatesThroughHttp
+PASS GeminiClientTest.httpErrorAndBadJsonBecomeUnavailable
+PASS GeminiClientTest.retriesOnceOn503
+PASS GeminiClientTest.placeholderKeyBecomesUnavailableNotCrash
+PASS GeminiClientTest.aiDisabled
+PASS AuthTest.passwordHashRoundTrip
+PASS AuthTest.emptyMailFromFallsBackToUsername
+PASS AuthTest.codeIsSixDigits
+PASS AuthTest.codeHashDependsOnEmail
+PASS AuthTest.staffListAcceptsAnyValidEmail
+33 passed, 0 failed
